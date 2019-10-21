@@ -15,4 +15,5 @@
 #define OPCUA_CORE_ERROR(name, code, message) Common::ErrorData name(OPCUA_CORE_MODULE_ERROR_CODE(code), message)
 
 OPCUA_CORE_ERROR(CannotCreateChannelOnInvalidSocket,   1, "Cannot create socket on invalid socket.");
+OPCUA_CORE_ERROR(CannotCreateChannelOnInvalidNamespace,   2, "Cannot create face on invalid namespace.");
 

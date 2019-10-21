@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 
 #It seems Cmake does not set default bild type so we force it
 if( NOT CMAKE_BUILD_TYPE )
     set( CMAKE_BUILD_TYPE Debug CACHE STRING "Debug" FORCE )
 endif()
-
-project(freeopcua)
+set (CMAKE_CXX_STANDARD 14)
+project(freeopcua-ndn)
 
 option(BUILD_CLIENT "Build Client" ON)
 option(BUILD_SERVER "Build Server" ON)
@@ -74,7 +74,7 @@ else(MSVC)
     SET(EXECUTABLE_CXX_FLAGS)
     SET(DYNAMIC_LIBRARY_CXX_FLAGS)
     SET(D -D)
-    set(CMAKE_CXX_FLAGS " -std=c++11 -Wall -fPIC ${CMAKE_CXX_FLAGS} ")
+    set(CMAKE_CXX_FLAGS " -std=c++14 -Wall -fPIC ${CMAKE_CXX_FLAGS} ")
     SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS_INIT} $ENV{LDFLAGS}")
     #set(CMAKE_SHARED_LINKER_FLAGS "--no-undefined" )
 endif()
@@ -119,6 +119,14 @@ include_directories( ${Boost_INCLUDE_DIRS} )
 link_directories( ${Boost_LIBRARY_DIRS} )
 message(STATUS "Boost INCLUDE DIR IS: " ${Boost_INCLUDE_DIRS})
 message(STATUS "Boost LIBRARY DIR IS: " ${Boost_LIBRARY_DIRS})
+
+include_directories( ${NDN_CXX_INCLUDE_DIRS})
+link_directories( ${NDN_CXX_LIBRARY_DIRS} )
+link_libraries( ${NDN_CXX_LIBRARIES})
+
+message(STATUS "NDN-CXX INCLUDE DIR IS: " ${NDN_CXX_INCLUDE_DIRS})
+message(STATUS "NDN-CXX LIBRARY DIR IS: " ${NDN_CXX_LIBRARY_DIRS})
+message(STATUS "NDN-CXX LIBRARY IS: " ${NDN_CXX_LIBRARIES})
 
 message(STATUS "SSL support using libmbedtls: " ${SSL_SUPPORT_MBEDTLS})
 if (SSL_SUPPORT_MBEDTLS)
@@ -269,6 +277,7 @@ SET(opcuacore_SOURCES
     src/core/node.cpp
     src/core/opcua_errors.cpp
     src/core/socket_channel.cpp
+    src/core/ndn_channel.cpp
     src/core/subscription.cpp
     src/core/server_operations.cpp
 )
