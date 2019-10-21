@@ -21,6 +21,7 @@ OpcUa::NdnChannel::NdnChannel (const ndn::Name _namespace, ndn::Face face)
   , m_face(face)
 {
 }
+
 std::size_t OpcUa::NdnChannel::Receive(const ndn::Data data, std::size_t size)
 {
   ndn::Name nextName = m_namespace.appendSequenceNumber (m_recv_counter);
