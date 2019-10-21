@@ -15,14 +15,13 @@
 #include <stdexcept>
 #include <ndn-cxx/interest.hpp>
 #include <ndn-cxx/data.hpp>
-#include <python3.6m/Python-ast.h>
 
 OpcUa::NdnChannel::NdnChannel (const ndn::Name _namespace, ndn::Face face)
-  : m_face(face)
-  , m_namespace(_namespace)
+  : m_namespace(_namespace)
+  , m_face(face)
 {
 }
-std::size_t OpcUa::NdnChannel::Receive(char * data, std::size_t size)
+std::size_t OpcUa::NdnChannel::Receive(const ndn::Data data, std::size_t size)
 {
   ndn::Name nextName = m_namespace.appendSequenceNumber (m_recv_counter);
   std::cerr << ">> C++ " << nextName << std::endl;
@@ -32,6 +31,7 @@ std::size_t OpcUa::NdnChannel::Receive(char * data, std::size_t size)
                          std::bind(&OpcUa::NdnChannel::onNack, this, _1),
                          std::bind(&OpcUa::NdnChannel::onTimeout, this, _1));
   ++m_recv_counter;
+  return m_recv_counter;
 }
 
 void OpcUa::NdnChannel::Send(const char *message, std::size_t size)
@@ -58,7 +58,7 @@ OpcUa::NdnChannel::onData(const ndn::Data& data)
       return;
     }
 
-  Receive(std::string(reinterpret_cast<const char*>(data.getContent().value()), data.getContent().value_size()));
+  Receive(data, data.getContent().value_size());
 }
 
 void
