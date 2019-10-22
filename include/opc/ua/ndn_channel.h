@@ -23,8 +23,9 @@ class NdnChannel : public OpcUa::IOChannel
 public:
   NdnChannel(const std::string &_namespace, ndn::Face &face);
 
-  virtual std::size_t Receive(const ndn::Data &data, std::size_t size);
+  virtual std::size_t Receive(char* data, std::size_t size);
   virtual void Send(const char* message, std::size_t size);
+  virtual void Stop();
 
 private:
   std::string m_namespace;

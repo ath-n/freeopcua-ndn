@@ -24,7 +24,7 @@ class NdnReceiver
 {
 public:
   NdnReceiver (ndn::Face &face, const std::string &_namespace);
-  std::string RequestData();
+  const char * RequestData();
 
 private:
   void requestNext ();

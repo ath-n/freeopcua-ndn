@@ -27,6 +27,10 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <ndn-cxx/face.hpp>
+#include <opc/ua/ndn_receiver.h>
+#include <opc/ua/ndn_channel.h>
+
 #endif
 
 namespace
@@ -123,6 +127,53 @@ private:
   Common::Logger::SharedPtr Logger;
 };
 
+class NdnBinaryConnection : public OpcUa::RemoteConnection
+{
+public:
+  NdnBinaryConnection(const std::string &_namespace, ndn::Face &face, const Common::Logger::SharedPtr & logger)
+    : m_baseName(_namespace)
+    , m_face(face)
+    , Channel(m_baseName, m_face)
+  {
+  }
+
+  virtual ~NdnBinaryConnection()
+  {
+  }
+
+  virtual std::size_t Receive(char * data, std::size_t size)
+  {
+    return Channel.Receive(data, size);
+  }
+
+  virtual void Send(const char * message, std::size_t size)
+  {
+    LOG_TRACE(Logger, "binary_connection     | send: {}", OpcUa::ToHexDump(message, size));
+    return Channel.Send(message, size);
+  }
+
+
+  virtual void Stop()
+  {
+    Channel.Stop();
+  }
+
+  virtual std::string GetHost() const
+  {
+    return "";
+  }
+
+  virtual unsigned GetPort() const
+  {
+    return -1;
+  }
+
+private:
+  const std::string m_baseName;
+  ndn::Face &m_face;
+  OpcUa::NdnChannel Channel;
+  Common::Logger::SharedPtr Logger;
+};
 }
 
 std::unique_ptr<OpcUa::RemoteConnection> OpcUa::Connect(const std::string & host, unsigned port, const Common::Logger::SharedPtr & logger)

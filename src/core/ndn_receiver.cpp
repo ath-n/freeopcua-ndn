@@ -24,9 +24,9 @@ OpcUa::NdnReceiver::NdnReceiver (ndn::Face &face, const std::string &_namespace)
   std::cerr << "Base name: " << m_baseName << std::endl;
 }
 
-std::string OpcUa::NdnReceiver::RequestData() {
+const char * OpcUa::NdnReceiver::RequestData() {
   requestNext ();
-  return m_data;
+  return m_data.c_str ();
 }
 
 void

@@ -24,12 +24,13 @@ OpcUa::NdnChannel::NdnChannel (const std::string &_namespace, ndn::Face &face)
 {
 }
 
-std::size_t OpcUa::NdnChannel::Receive(const ndn::Data &data, std::size_t size)
+std::size_t OpcUa::NdnChannel::Receive(char* data, std::size_t size)
 {
   OpcUa::NdnReceiver receiver(m_face, m_namespace);
-  std::string str_data = receiver.RequestData ();
+  std::string str_data (receiver.RequestData ());
+  data = &str_data[0];
 
-  return 0;
+  return str_data.size ();
 }
 
 void OpcUa::NdnChannel::Send(const char *message, std::size_t size)
@@ -42,4 +43,9 @@ void OpcUa::NdnChannel::Send(const char *message, std::size_t size)
   data->setFreshnessPeriod(ndn::time::seconds(10));
   m_keyChain.sign(*data);
   m_face.put(*data);
+}
+
+void OpcUa::NdnChannel::Stop ()
+{
+  return;
 }
