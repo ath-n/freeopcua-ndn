@@ -10,29 +10,26 @@
 /// http://www.gnu.org/licenses/lgpl.html)
 
 #include <opc/ua/ndn_channel.h>
+#include <opc/ua/ndn_receiver.h>
 #include <opc/ua/errors.h>
+
 #include <iostream>
 #include <stdexcept>
 #include <ndn-cxx/interest.hpp>
 #include <ndn-cxx/data.hpp>
 
-OpcUa::NdnChannel::NdnChannel (const ndn::Name _namespace, ndn::Face face)
+OpcUa::NdnChannel::NdnChannel (const std::string &_namespace, ndn::Face &face)
   : m_namespace(_namespace)
   , m_face(face)
 {
 }
 
-std::size_t OpcUa::NdnChannel::Receive(const ndn::Data data, std::size_t size)
+std::size_t OpcUa::NdnChannel::Receive(const ndn::Data &data, std::size_t size)
 {
-  ndn::Name nextName = m_namespace.appendSequenceNumber (m_recv_counter);
-  std::cerr << ">> C++ " << nextName << std::endl;
+  OpcUa::NdnReceiver receiver(m_face, m_namespace);
+  std::string str_data = receiver.RequestData ();
 
-  m_face.expressInterest(ndn::Interest(nextName).setMustBeFresh(true),
-                         std::bind(&OpcUa::NdnChannel::onData, this, _2),
-                         std::bind(&OpcUa::NdnChannel::onNack, this, _1),
-                         std::bind(&OpcUa::NdnChannel::onTimeout, this, _1));
-  ++m_recv_counter;
-  return m_recv_counter;
+  return 0;
 }
 
 void OpcUa::NdnChannel::Send(const char *message, std::size_t size)
@@ -45,36 +42,4 @@ void OpcUa::NdnChannel::Send(const char *message, std::size_t size)
   data->setFreshnessPeriod(ndn::time::seconds(10));
   m_keyChain.sign(*data);
   m_face.put(*data);
-}
-
-void
-OpcUa::NdnChannel::onData(const ndn::Data& data)
-{
-  std::cerr << "<< C++ "
-    << std::string(reinterpret_cast<const char*>(data.getContent().value()),
-                   data.getContent().value_size())
-    << std::endl;
-
-  if (data.getName().get(-1).toSequenceNumber() >= 10) {
-      return;
-    }
-
-  Receive(data, data.getContent().value_size());
-}
-
-void
-OpcUa::NdnChannel::onNack(const ndn::Interest& interest)
-{
-  std::cerr << "<< got NACK for " << interest << std::endl;
-}
-
-void
-OpcUa::NdnChannel::onTimeout(const ndn::Interest& interest)
-{
-  // re-express interest
-  std::cerr << "<< C++ timeout for " << interest << std::endl;
-   m_face.expressInterest(ndn::Interest(interest.getName()),
-                         std::bind(&OpcUa::NdnChannel::onData, this, _2),
-                         std::bind(&OpcUa::NdnChannel::onNack, this, _1),
-                         std::bind(&OpcUa::NdnChannel::onTimeout, this, _1));
 }
